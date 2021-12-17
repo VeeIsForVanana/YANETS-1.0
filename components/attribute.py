@@ -23,8 +23,7 @@ class Attribute():
     def max(self) -> int:
         return self._max
 
-    @max.setter
-    def max(self, new_max: int, match_current: bool = False) -> None:
+    def new_max(self, new_max: int, match_current: bool = False) -> None:
         self._max = max(self.value, new_max)
         if match_current:
             self.new_value(new_max)
@@ -33,8 +32,7 @@ class Attribute():
     def min(self) -> int:
         return self._min
 
-    @min.setter
-    def min(self, new_min: int) -> None:
+    def new_min(self, new_min: int) -> None:
         self._min = min(self.value, new_min)
 
 

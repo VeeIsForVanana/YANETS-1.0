@@ -546,7 +546,7 @@ class LevelUpEventHandler(OptionSelectionHandler):
 
         if self.present_selection == 0:
             player.level.increase_max_hp()
-            player.fighter.hp_attr.max(20, True)
+            player.fighter.hp_attr.new_max(player.fighter.hp_attr.max + 20, True)
         elif self.present_selection == 1:
             player.level.increase_power()
             player.fighter.attributes[self.present_selection].add_to_value(1)

@@ -30,4 +30,5 @@ class Inventory(BaseComponent):
             dx, dy = random.randint(-1, 1), random.randint(-1, 1)
             item.place(self.parent.x + dx, self.parent.y + dy, self.gamemap)
             self.engine.message_log.add_message(f"{'You' if self.parent.entity_id == 0 else self.parent.name}"
-                                                f" dropped {item.name} randomly about as they died.")
+                                                f" dropped {item.name}"
+                                                f" randomly about as {'you' if self.parent.entity_id == 0 else 'they'} died.")
