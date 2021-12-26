@@ -25,6 +25,7 @@ def new_game(debug: bool = False) -> Engine:
     """Return a brand new game session as an Engine instance."""
     map_width = render_standards.map_width
     map_height = render_standards.map_height
+    map_tiling = render_standards.map_tiling
 
     room_max_size = 10
     room_min_size = 6
@@ -46,6 +47,7 @@ def new_game(debug: bool = False) -> Engine:
         room_max_size=room_max_size,
         map_width=map_width,
         map_height=map_height,
+        map_tiling=map_tiling
     )
 
     engine.game_world.generate_floor()

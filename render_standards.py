@@ -12,6 +12,10 @@ screen_width = 100
 map_height = 60
 map_width = 60
 
+# Number of map tiles expected per floor (WIP)
+
+map_tiling = 3
+
 # Inventory Standards
 
 inventory_x = map_width

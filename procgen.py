@@ -8,6 +8,7 @@ import tcod
 import entity_factories
 from game_map import GameMap
 import tile_types
+import render_standards as rs
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -152,30 +153,38 @@ def generate_dungeon(
         room_max_size: int,
         map_width: int,
         map_height: int,
+        map_tiling: int,
         engine: Engine
 ) -> GameMap:
     """Generate a new dungeon map."""
+    map_width *= map_tiling
+    map_height *= map_tiling
     player = engine.player
-    dungeon = GameMap(engine, map_width, map_height, entities = [player])
+    dungeon = GameMap(engine, map_width, map_height, map_tiling, entities = [player])
 
     rooms: List[RectangularRoom] = []
 
     center_of_last_room = (0, 0)
 
     for r in range(max_rooms):
-        room_width = random.randint(room_min_size, room_max_size)
-        room_height = random.randint(room_min_size, room_max_size)
+        valid_room = False
+        while not valid_room:
+            room_width = random.randint(room_min_size, room_max_size)
+            room_height = random.randint(room_min_size, room_max_size)
 
-        x = random.randint(0, dungeon.width - room_width - 1)
-        y = random.randint(0, dungeon.height - room_height - 1)
+            x = random.randint(0, dungeon.width - room_width - 1)
+            y = random.randint(0, dungeon.height - room_height - 1)
 
-        # "RectangularRoom" class makes rectangles easier to work with
-        new_room = RectangularRoom(x, y, room_width, room_height)
+            # "RectangularRoom" class makes rectangles easier to work with
+            new_room = RectangularRoom(x, y, room_width, room_height)
 
-        #Run through the other rooms and see if they intersect with this room.
-        if any(new_room.intersects(other_room) for other_room in rooms):
-            continue # This room intersects, so go to the next attempt.
-        # If there are no intersections then the room is valid.
+            # Run through the other rooms and see if they intersect with this room.
+            # Ensure new room center does not sit on the tile edge
+            if not (any(new_room.intersects(other_room) for other_room in rooms) \
+                    or new_room.center[0] in (0, rs.map_width) \
+                    or new_room.center[1] in (0, rs.map_height)):
+                valid_room = True
+            # If there are no intersections then the room is valid.
 
         #Dig out this room's inner area.
 

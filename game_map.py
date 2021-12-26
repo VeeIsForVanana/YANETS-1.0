@@ -16,10 +16,11 @@ if TYPE_CHECKING:
 
 class GameMap:
     def __init__(
-            self, engine: Engine, width: int, height: int, entities: Iterable[Entity] = ()
+            self, engine: Engine, width: int, height: int, tiling: int, entities: Iterable[Entity] = (),
     ):
         self.engine = engine
-        self.width, self.height = width, height
+        self.width, self.height, self.tiling = width, height, tiling
+        self.tile_width, self.tile_height = self.width // self.tiling, self.height // self.tiling
         self.entities = set(entities)
         self.tiles = np.full((width, height), fill_value = tile_types.wall, order = "F")
 
@@ -111,22 +112,29 @@ class GameMap:
         Otherwise, the default is "SHROUD".
         """
 
-        console.rgb[0 : self.width, 0 : self.height] = np.select(
+        self.player_tile = (self.entity_ids[0].x // self.tile_width, self.entity_ids[0].y // self.tile_height)
+
+        console.rgb[0 : self.tile_width, 0 : self.tile_height] = np.select(
             condlist = ([self.visible, self.explored] if not debug_mode else
                         [self.tile_exists]),
             choicelist = ([self.tiles["light"], self.tiles["dark"]] if not debug_mode else
                           [self.tiles["light"]]),
             default = tile_types.SHROUD,
-        )
+        )[self.player_tile[0] * self.tile_width:
+          (self.player_tile[0] + 1) * self.tile_width,
+          self.player_tile[1] * self.tile_height:
+          (self.player_tile[1] + 1) * self.tile_height]
 
         entities_sorted_for_rendering = sorted(
             self.entities, key = lambda x: x.render_order.value
         )
 
         for entity in entities_sorted_for_rendering:
-            if self.visible[entity.x, entity.y] or debug_mode:
+            if (self.visible[entity.x, entity.y] or debug_mode) and \
+                    entity.x // self.tile_width in range(self.player_tile[0], self.player_tile[0] + 2) and \
+                    entity.y // self.tile_height in range(self.player_tile[1], self.player_tile[1] + 2):
                 console.print(
-                    entity.x, entity.y, entity.char, fg = entity.color
+                    entity.x % self.tile_width, entity.y % self.tile_height, entity.char, fg = entity.color
                 )
 
 class GameWorld:
@@ -138,6 +146,7 @@ class GameWorld:
             engine: Engine,
             map_width: int,
             map_height: int,
+            map_tiling: int,
             max_rooms: int,
             room_min_size: int,
             room_max_size: int,
@@ -147,6 +156,7 @@ class GameWorld:
 
         self.map_width = map_width
         self.map_height = map_height
+        self.map_tiling = map_tiling
 
         self.max_rooms = max_rooms
 
@@ -166,5 +176,6 @@ class GameWorld:
             room_max_size=self.room_max_size,
             map_width=self.map_width,
             map_height=self.map_height,
+            map_tiling=self.map_tiling,
             engine=self.engine
         )
