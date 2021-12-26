@@ -6,7 +6,7 @@ from typing import Dict, Iterator, Tuple, List, TYPE_CHECKING
 import tcod
 
 import entity_factories
-from game_map import GameMap
+from game_map import GameMap, GameWorld
 import tile_types
 import render_standards as rs
 
@@ -147,21 +147,16 @@ def tunnel_between(
     for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
         yield x, y
 
-def generate_dungeon(
-        max_rooms: int,
-        room_min_size: int,
-        room_max_size: int,
-        map_width: int,
-        map_height: int,
-        map_tiling: int,
-        engine: Engine
-) -> GameMap:
-    """Generate a new dungeon map."""
+def generate_dungeon(parent_world: GameWorld, max_rooms: int, room_min_size: int, room_max_size: int, map_width: int,
+                     map_height: int, map_tiling: int, engine: Engine) -> GameMap:
+    """
+    Generate a new dungeon map.
+    """
     map_width *= map_tiling
     map_height *= map_tiling
     player = engine.player
     dungeon = GameMap(engine, map_width, map_height, map_tiling, entities = [player])
-
+    dungeon.parent = parent_world
     rooms: List[RectangularRoom] = []
 
     center_of_last_room = (0, 0)
@@ -180,8 +175,8 @@ def generate_dungeon(
 
             # Run through the other rooms and see if they intersect with this room.
             # Ensure new room center does not sit on the tile edge
-            if not (any(new_room.intersects(other_room) for other_room in rooms) \
-                    or new_room.center[0] in (0, rs.map_width) \
+            if not (any(new_room.intersects(other_room) for other_room in rooms)
+                    or new_room.center[0] in (0, rs.map_width)
                     or new_room.center[1] in (0, rs.map_height)):
                 valid_room = True
             # If there are no intersections then the room is valid.
@@ -193,8 +188,9 @@ def generate_dungeon(
         if len(rooms) == 0:
             # The first room, where the player starts.
             player.place(new_room.center[0], new_room.center[1], dungeon)
-            entity_factories.dagger.spawn(dungeon, new_room.center[0] + 1, new_room.center[1])
-            entity_factories.leather_armor.spawn(dungeon, new_room.center[0] - 1, new_room.center[1])
+            if parent_world.current_floor == 1:
+                entity_factories.dagger.spawn(dungeon, new_room.center[0] + 1, new_room.center[1])
+                entity_factories.leather_armor.spawn(dungeon, new_room.center[0] - 1, new_room.center[1])
         if len(rooms) >= 1: # All rooms after the first.
             # Dig out a tunnel between this room and the next one.
             for x, y in tunnel_between(rooms[-1].center, new_room.center):

@@ -47,7 +47,8 @@ def new_game(debug: bool = False) -> Engine:
         room_max_size=room_max_size,
         map_width=map_width,
         map_height=map_height,
-        map_tiling=map_tiling
+        map_tiling=map_tiling,
+        current_floor=1
     )
 
     engine.game_world.generate_floor()
@@ -82,7 +83,7 @@ class MainMenu(input_handlers.BaseEventHandler):
         self.console.print(
             self.console.width // 2,
             self.console.height // 2 - 4,
-            "TOMBS OF THE ANCIENT KINGS",
+            "You Are Not Expected To Survive",
             fg = color.menu_title,
             alignment = tcod.CENTER
         )

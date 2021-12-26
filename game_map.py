@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Iterator, Iterable, TYPE_CHECKING, Generator, Tuple
+from typing import Optional, Iterator, Iterable, TYPE_CHECKING, Generator, Tuple, List
 
 import numpy as np  # type: ignore
 from tcod.console import Console
@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 
 class GameMap:
+    parent: GameWorld
+
     def __init__(
             self, engine: Engine, width: int, height: int, tiling: int, entities: Iterable[Entity] = (),
     ):
@@ -37,6 +39,7 @@ class GameMap:
         self.entity_ids: dict[int: Entity] = {}
 
         self.downstairs_location = (0, 0)
+        self.upstairs_location = (0, 0)
 
     @property
     def gamemap(self) -> GameMap:
@@ -103,6 +106,11 @@ class GameMap:
         """Return True if x and y are inside of the bounds of this map"""
         return 0 <= x < self.width and 0 <= y < self.height
 
+    def update(self):
+        """Updates important map locations to stay consistent with their tiles"""
+        self.tiles[self.upstairs_location] = tile_types.up_stairs
+        self.tiles[self.downstairs_location] = tile_types.down_stairs
+
     def render(self, console: Console, debug_mode: bool = False) -> None:
         """
         Renders the map.
@@ -165,17 +173,27 @@ class GameWorld:
 
         self.current_floor = current_floor
 
+        self.floors: List[GameMap] = []
+
     def generate_floor(self) -> None:
         from procgen import generate_dungeon
 
-        self.current_floor += 1
-
         self.engine.game_map = generate_dungeon(
+            self,
             max_rooms=self.max_rooms,
             room_min_size=self.room_min_size,
             room_max_size=self.room_max_size,
             map_width=self.map_width,
             map_height=self.map_height,
             map_tiling=self.map_tiling,
-            engine=self.engine
-        )
+            engine=self.engine)
+
+        self.floors.append(self.engine.game_map)
+
+    def load_floor(self, going_down: bool) -> None:
+        self.engine.game_map = self.floors[self.current_floor - 1]
+        if going_down:
+            new_position = self.engine.game_map.upstairs_location
+        else:
+            new_position = self.engine.game_map.downstairs_location
+        self.engine.player.place(new_position[0], new_position[1], self.engine.game_map)

@@ -4,6 +4,7 @@ from typing import Optional, Tuple, TYPE_CHECKING
 
 import color
 import exceptions
+import tile_types
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -104,15 +105,39 @@ class WaitAction(Action):
         pass
 
 
-class TakeStairsAction(Action):
+class TakeDownStairsAction(Action):
     def perform(self) -> None:
         """
         Take the stairs, if any exist at the entity's location.
         """
         if (self.entity.x, self.entity.y) == self.engine.game_map.downstairs_location:
-            self.engine.game_world.generate_floor()
+            try:
+                self.engine.game_world.current_floor += 1
+                self.engine.game_world.load_floor(True)
+            except IndexError:
+                self.engine.game_world.generate_floor()
+                self.engine.game_map.upstairs_location = self.entity.x, self.entity.y
+                self.engine.game_map.tiles[self.entity.x, self.entity.y] = tile_types.up_stairs
             self.engine.message_log.add_message(
                 "You descend the staircase.", color.descend
+            )
+        else:
+            raise exceptions.Impossible("There are no stairs here")
+
+
+class TakeUpStairsAction(Action):
+    def perform(self) -> None:
+        """
+        Take stairs up
+        """
+        if (self.entity.x, self.entity.y) == self.engine.game_map.upstairs_location:
+            try:
+                self.engine.game_world.current_floor -= 1
+                self.engine.game_world.load_floor(False)
+            except IndexError:
+                raise exceptions.Impossible("There is no upstairs")
+            self.engine.message_log.add_message(
+                "You ascend the staircase.", color.descend
             )
         else:
             raise exceptions.Impossible("There are no stairs here")

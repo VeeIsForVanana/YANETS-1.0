@@ -5,6 +5,7 @@ from typing import Tuple, TYPE_CHECKING, Iterable
 import color
 import textwrap
 
+import render_standards
 import render_standards as r_std
 
 if TYPE_CHECKING:
@@ -61,7 +62,6 @@ def render_names_at_cursor_location(
         console: Console, x: int, y: int, engine: Engine
 ) -> None:
     mouse_x, mouse_y = engine.cursor_location
-
     names_at_mouse_location = get_names_at_location(
         x = mouse_x, y = mouse_y, game_map = engine.game_map
     )
