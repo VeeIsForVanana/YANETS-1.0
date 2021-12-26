@@ -4,13 +4,17 @@ from __future__ import annotations
 
 # Console screen standards
 
-screen_height = 50
-screen_width = 110
+screen_height = 65
+screen_width = 100
 
 # Map size standards
 
-map_height = 40
-map_width = 75
+map_height = 60
+map_width = 60
+
+# Number of map tiles expected per floor (WIP)
+
+map_tiling = 1
 
 # Inventory Standards
 

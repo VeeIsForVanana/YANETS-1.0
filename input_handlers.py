@@ -189,7 +189,12 @@ class MainGameEventHandler(EventHandler):
         if key == tcod.event.K_PERIOD and modifier & (
             tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT
         ):
-            return actions.TakeStairsAction(player)
+            return actions.TakeDownStairsAction(player)
+
+        if key == tcod.event.K_COMMA and modifier & (
+            tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT
+        ):
+            return actions.TakeUpStairsAction(player)
 
         if key in MOVE_KEYS:
             dx, dy = MOVE_KEYS[key]
@@ -243,7 +248,7 @@ class DebugModeEventHandler(EventHandler):
         if key == tcod.event.K_PERIOD and modifier & (
             tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT
         ):
-            return actions.TakeStairsAction(player)
+            return actions.TakeDownStairsAction(player)
 
         if key in MOVE_KEYS:
             dx, dy = MOVE_KEYS[key]
@@ -253,12 +258,16 @@ class DebugModeEventHandler(EventHandler):
         elif key == tcod.event.K_ESCAPE:
             raise SystemExit
         elif key == tcod.event.K_SLASH:
-            return LookHandler(self.engine)
+            return LookHandler(self.engine, parent_handler = self)
 
         if key == tcod.event.K_PERIOD and modifier & (
             tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT
         ):
-            return actions.TakeStairsAction(player)
+            return actions.TakeDownStairsAction(player)
+        if key == tcod.event.K_COMMA and modifier & (
+            tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT
+        ):
+            return actions.TakeUpStairsAction(player)
 
         # No valid keypress
         return action
@@ -429,8 +438,10 @@ class SelectScreenIndexHandler(AskUserEventHandler):
         """Highlight the tile under the cursor."""
         super().on_render(console)
         x, y = self.engine.cursor_location
-        console.tiles_rgb["bg"][x, y] = color.white
-        console.tiles_rgb["fg"][x, y] = color.black
+        map_x = x %render_standards.map_height
+        map_y = y % render_standards.map_width
+        console.tiles_rgb["bg"][map_x, map_y] = color.white
+        console.tiles_rgb["fg"][map_x, map_y] = color.black
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
         """Check for key movement or confirmation keys."""
@@ -448,6 +459,8 @@ class SelectScreenIndexHandler(AskUserEventHandler):
             dx, dy = MOVE_KEYS[key]
             x += dx * modifier
             y += dy * modifier
+            x %= render_standards.map_width + self.engine.game_map.player_tile[0] * render_standards.map_width
+            y %= render_standards.map_height + self.engine.game_map.player_tile[1] * render_standards.map_height
             # Clamp the cursor index to the map size.
             x = max(0, min(x, self.engine.game_map.width - 1))
             y = max(0, min(y, self.engine.game_map.height - 1))
@@ -546,7 +559,7 @@ class LevelUpEventHandler(OptionSelectionHandler):
 
         if self.present_selection == 0:
             player.level.increase_max_hp()
-            player.fighter.hp_attr.max(20, True)
+            player.fighter.hp_attr.new_max(player.fighter.hp_attr.max + 20, True)
         elif self.present_selection == 1:
             player.level.increase_power()
             player.fighter.attributes[self.present_selection].add_to_value(1)
@@ -564,7 +577,9 @@ class LookHandler(SelectScreenIndexHandler):
     def __init__(self, engine: Engine, parent_handler: Optional[BaseEventHandler] = None):
         super().__init__(engine)
         if parent_handler is None:
-            parent_handler = MainGameEventHandler(engine)
+            self.parent_handler = MainGameEventHandler(engine)
+        else:
+            self.parent_handler = parent_handler
 
     def on_render(self, console: tcod.Console) -> None:
         super().on_render(console)
@@ -577,7 +592,10 @@ class LookHandler(SelectScreenIndexHandler):
 
     def on_index_selected(self, x: int, y: int) -> Optional[ActionOrHandler]:
         """Return to main handler."""
-        return parent_handler
+        return self.parent_handler
+
+    def on_exit(self) -> Optional[ActionOrHandler]:
+        return self.parent_handler
 
 
 class SingleRangedAttackHandler(SelectScreenIndexHandler):
