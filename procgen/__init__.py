@@ -11,6 +11,7 @@ import numpy as np
 
 from procgen.helpers import tunnel_between, diagonal_between
 from procgen.rectangular_room import RectangularRoom
+from procgen.structure import Structure
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -182,8 +183,8 @@ def generate_surface(parent_world: GameWorld, entrance_size: int, map_width: int
 
     player.place(start_x, start_y, surface)
 
-    generate_structure(surface, random.randint(40, map_width - 40), random.randint(40, map_height - 40),
-                       random.randint(10, 50), random.randint(10, 50))
+    generate_structure(surface, random.randint(55, map_width - 55), random.randint(55, map_height - 55),
+                       random.randint(30, 50), random.randint(30, 50))
 
     return surface
 
@@ -191,8 +192,9 @@ def generate_structure(game_map: GameMap, corner_x: int, corner_y: int, width: i
     """
     Generates structures of continuous walls
     """
-    structure = np.full((width, height), fill_value=tile_types.floor, order="F")
-    game_map.tiles[corner_x: corner_x + width, corner_y: corner_y + height] = structure
-    rooms: List[RectangularRoom] = []
+    structure = Structure(corner_x, corner_y, width, height)
+    structure.make_binary_partition(0.8, 0.2, 4, 1)
+    structure.generate_outside_connection()
+    game_map.tiles[corner_x: corner_x + width, corner_y: corner_y + height] = structure.tiles[0: width, 0: height]
 
     return None
