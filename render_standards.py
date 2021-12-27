@@ -14,7 +14,7 @@ map_width = 60
 
 # Number of map tiles expected per floor (WIP)
 
-map_tiling = 1
+map_tiling = 3
 
 # Inventory Standards
 

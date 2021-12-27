@@ -143,13 +143,13 @@ def render_character_screen(
             console.print(
                 x=x + r_std.padding_standard + 2,
                 y=(y + r_std.padding_standard) + equipment_info_offset + 1,
-                string=f"Weapon: {weapon.name if weapon else 'None equipped'}"
+                string=f"Weapon: {weapon.name if weapon else 'None equipped'} (+{weapon.equippable.power_bonus.value if weapon else '0'})"
             )
 
             console.print(
                 x=x + r_std.padding_standard + 2,
                 y=(y + r_std.padding_standard) + equipment_info_offset + 2,
-                string=f"Armor: {armor.name if armor else 'None equipped'}"
+                string=f"Armor: {armor.name if armor else 'None equipped'} (+{armor.equippable.defense_bonus.value if armor else '0'})"
             )
 
 def render_debug_info_readout(

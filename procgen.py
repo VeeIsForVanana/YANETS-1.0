@@ -9,6 +9,7 @@ import entity_factories
 from game_map import GameMap, GameWorld
 import tile_types
 import render_standards as rs
+import numpy as np
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -207,3 +208,34 @@ def generate_dungeon(parent_world: GameWorld, max_rooms: int, room_min_size: int
         rooms.append(new_room)
 
     return dungeon
+
+def generate_surface(parent_world: GameWorld, entrance_size: int, map_width: int,
+                     map_height: int, map_tiling: int, engine: Engine) -> GameMap:
+    """
+    Generates surface layer and entrance
+    """
+    map_width *= map_tiling
+    map_height *= map_tiling
+    player = engine.player
+    surface = GameMap(engine, map_width, map_height, map_tiling, entities=[player], fill_tile=tile_types.surface_floor)
+    surface.parent = parent_world
+
+    start_x = random.choice([10, map_width - 10])
+    start_y = random.choice([10, map_height - 10])
+
+    player.place(start_x, start_y, surface)
+
+    generate_structure(surface, random.randint(40, map_width - 40), random.randint(40, map_height - 40),
+                       random.randint(10, 50), random.randint(10, 50))
+
+    return surface
+
+def generate_structure(game_map: GameMap, corner_x: int, corner_y: int, width: int, height: int) -> None:
+    """
+    Generates structures of continuous walls
+    """
+    structure = np.full((width, height), fill_value=tile_types.floor, order="F")
+    game_map.tiles[corner_x: corner_x + width, corner_y: corner_y + height] = structure
+    rooms: List[RectangularRoom] = []
+
+    return None

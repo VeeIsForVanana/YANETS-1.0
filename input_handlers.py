@@ -414,13 +414,13 @@ class CharacterScreenEventHandler(AskUserEventHandler):
         console.print(
             x = x + render_standards.padding_standard,
             y = y + render_standards.padding_standard + 4,
-            string = f"Attack: {self.engine.player.fighter.base_power} + "
+            string = f"Attack: {self.engine.player.fighter.base_power.value} + "
                      f"{self.engine.player.equipment.power_bonus}"
         )
         console.print(
             x = x + render_standards.padding_standard,
             y = y + render_standards.padding_standard + 5,
-            string = f"Defense: {self.engine.player.fighter.base_defense} + "
+            string = f"Defense: {self.engine.player.fighter.base_defense.value} + "
                      f"{self.engine.player.equipment.power_bonus}"
         )
 
