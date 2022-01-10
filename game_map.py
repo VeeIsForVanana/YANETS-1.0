@@ -19,12 +19,13 @@ class GameMap:
 
     def __init__(
             self, engine: Engine, width: int, height: int, tiling: int, entities: Iterable[Entity] = (),
+            fill_tile = tile_types.wall
     ):
         self.engine = engine
         self.width, self.height, self.tiling = width, height, tiling
         self.tile_width, self.tile_height = self.width // self.tiling, self.height // self.tiling
         self.entities = set(entities)
-        self.tiles = np.full((width, height), fill_value = tile_types.wall, order = "F")
+        self.tiles = np.full((width, height), fill_value = fill_tile, order = "F")
 
         self.visible = np.full(
             (width, height), fill_value = False, order = "F"
@@ -176,22 +177,34 @@ class GameWorld:
         self.floors: List[GameMap] = []
 
     def generate_floor(self) -> None:
-        from procgen import generate_dungeon
+        from procgen import generate_dungeon, generate_surface
 
-        self.engine.game_map = generate_dungeon(
-            self,
-            max_rooms=self.max_rooms,
-            room_min_size=self.room_min_size,
-            room_max_size=self.room_max_size,
-            map_width=self.map_width,
-            map_height=self.map_height,
-            map_tiling=self.map_tiling,
-            engine=self.engine)
+        if self.current_floor > 0:
+            self.engine.game_map = generate_dungeon(
+                self,
+                max_rooms=self.max_rooms,
+                room_min_size=self.room_min_size,
+                room_max_size=self.room_max_size,
+                map_width=self.map_width,
+                map_height=self.map_height,
+                map_tiling=self.map_tiling,
+                engine=self.engine)
+
+        else:
+
+            self.engine.game_map = generate_surface(
+                self,
+                map_width=self.map_width,
+                map_height=self.map_height,
+                map_tiling=self.map_tiling,
+                engine=self.engine,
+                entrance_size=20
+            )
 
         self.floors.append(self.engine.game_map)
 
     def load_floor(self, going_down: bool) -> None:
-        self.engine.game_map = self.floors[self.current_floor - 1]
+        self.engine.game_map = self.floors[self.current_floor]
         if going_down:
             new_position = self.engine.game_map.upstairs_location
         else:

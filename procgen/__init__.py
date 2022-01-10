@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, Iterator, Tuple, List, TYPE_CHECKING
-
-import tcod
+from typing import Dict, Tuple, List, TYPE_CHECKING
 
 import entity_factories
 from game_map import GameMap, GameWorld
 import tile_types
 import render_standards as rs
+import numpy as np
+
+from procgen.helpers import tunnel_between, diagonal_between
+from procgen.rectangular_room import RectangularRoom
+from procgen.structure import Structure
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -78,33 +81,6 @@ def get_entities_at_random(
 
     return chosen_entities
 
-class RectangularRoom:
-    def __init__(self, x: int, y: int, width: int, height: int):
-        self.x1 = x
-        self.y1 = y
-        self.x2 = x + width
-        self.y2 = y + height
-
-    @property
-    def center(self) -> Tuple [int, int]:
-        center_x = int((self.x1 + self.x2) / 2)
-        center_y = int((self.y1 + self.y2) / 2)
-
-        return center_x, center_y
-
-    @property
-    def inner(self) -> Tuple[slice, slice]:
-        """Return the inner area of this room as a 2D array index."""
-        return slice(self.x1 + 1, self.x2), slice(self.y1 + 1, self.y2)
-
-    def intersects(self, other: RectangularRoom) -> bool:
-        """Return True if this room overlaps with another RectangularRoom."""
-        return (
-            self.x1 <= other.x2
-            and self.x2 >= other.x1
-            and self.y1 <= other.y2
-            and self.y2 >= other.y1
-        )
 
 def place_entities(
         room: RectangularRoom, dungeon: GameMap, floor_number: int,
@@ -129,23 +105,6 @@ def place_entities(
 
         if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
             entity.spawn(dungeon, x, y)
-
-def tunnel_between(
-        start: Tuple[int, int], end: Tuple[int, int]
-) -> Iterator[Tuple[int, int]]:
-    """Return an L-shaped tunnel between these two points."""
-    x1, y1 = start
-    x2, y2 = end
-    corner_x, corner_y = x1, y2
-    if random.random() < 0.5: # 50% chance.
-        # Move horizontally, then vertically.
-        corner_x, corner_y = x2, y1
-
-    #Generate the coordinates for this tunnel
-    for x, y in tcod.los.bresenham((x1, y1), (corner_x, corner_y)).tolist():
-        yield x, y
-    for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
-        yield x, y
 
 def generate_dungeon(parent_world: GameWorld, max_rooms: int, room_min_size: int, room_max_size: int, map_width: int,
                      map_height: int, map_tiling: int, engine: Engine) -> GameMap:
@@ -193,17 +152,50 @@ def generate_dungeon(parent_world: GameWorld, max_rooms: int, room_min_size: int
                 entity_factories.leather_armor.spawn(dungeon, new_room.center[0] - 1, new_room.center[1])
         if len(rooms) >= 1: # All rooms after the first.
             # Dig out a tunnel between this room and the next one.
-            for x, y in tunnel_between(rooms[-1].center, new_room.center):
+            for x, y in diagonal_between(rooms[-1].center, new_room.center):
                 dungeon.tiles[x, y] = tile_types.floor
 
+        if len(rooms) == max_rooms - 2: # Final room
             center_of_last_room = new_room.center
+            dungeon.tiles[center_of_last_room] = tile_types.down_stairs
+            dungeon.downstairs_location = center_of_last_room
 
         place_entities(new_room, dungeon, engine.game_world.current_floor)
-
-        dungeon.tiles[center_of_last_room] = tile_types.down_stairs
-        dungeon.downstairs_location = center_of_last_room
 
         #Finally, append the new room to the list.
         rooms.append(new_room)
 
     return dungeon
+
+def generate_surface(parent_world: GameWorld, entrance_size: int, map_width: int,
+                     map_height: int, map_tiling: int, engine: Engine) -> GameMap:
+    """
+    Generates surface layer and entrance
+    """
+    map_width *= map_tiling
+    map_height *= map_tiling
+    player = engine.player
+    surface = GameMap(engine, map_width, map_height, map_tiling, entities=[player], fill_tile=tile_types.surface_floor)
+    surface.parent = parent_world
+
+    start_x = random.choice([10, map_width - 10])
+    start_y = random.choice([10, map_height - 10])
+
+    player.place(start_x, start_y, surface)
+
+    generate_structure(surface, random.randint(55, map_width - 55), random.randint(55, map_height - 55),
+                       random.randint(30, 50), random.randint(30, 50))
+
+    return surface
+
+def generate_structure(game_map: GameMap, corner_x: int, corner_y: int, width: int, height: int) -> None:
+    """
+    Generates structures of continuous walls
+    """
+    structure = Structure(game_map, corner_x, corner_y, width, height)
+    structure.make_binary_partition(0.8, 0.2, 4, 1)
+    structure.generate_outside_connection()
+    game_map.tiles[corner_x: corner_x + width, corner_y: corner_y + height] = structure.tiles[0: width, 0: height]
+    structure.generate_downstairs()
+
+    return None

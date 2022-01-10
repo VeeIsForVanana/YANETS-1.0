@@ -49,10 +49,10 @@ class DefenseAttribute(Attribute):
 
     parent: BaseComponent
 
-    name = "Defense"
+    name = "Base Defense"
 
 class PowerAttribute(Attribute):
 
     parent: BaseComponent
 
-    name = "Power"
+    name = "Base Power"

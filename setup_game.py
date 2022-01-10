@@ -48,7 +48,7 @@ def new_game(debug: bool = False) -> Engine:
         map_width=map_width,
         map_height=map_height,
         map_tiling=map_tiling,
-        current_floor=1
+        current_floor=0
     )
 
     engine.game_world.generate_floor()
