@@ -2,6 +2,8 @@ import random
 from typing import List, Optional, Dict
 
 import numpy as np
+
+import game_map
 import tile_types
 
 import procgen.helpers as help
@@ -11,7 +13,8 @@ import tcod
 
 class Structure:
     """General class for multi-room objects"""
-    def __init__(self, struct_x: int, struct_y: int, struct_width: int, struct_height: int, fill_tile = tile_types.wall):
+    def __init__(self, parent: game_map.GameMap, struct_x: int, struct_y: int, struct_width: int, struct_height: int, fill_tile = tile_types.wall):
+        self.parent = parent
         self.rooms: Dict[tcod.bsp.BSP: RectangularRoom] = {}
         self.x = struct_x
         self.y = struct_y
@@ -52,3 +55,9 @@ class Structure:
             if tile_types.floor in floor_checker:
                 invalid_door = False
         self.tiles[door] = tile_types.floor
+
+    def generate_downstairs(self):
+        if isinstance(self.blueprint, tcod.bsp.BSP):
+            node = list(self.blueprint.post_order())[0]
+            self.parent.downstairs_location = (self.rooms[node].center[0] + self.x, self.rooms[node].center[1] + self.y)
+            self.parent.update()

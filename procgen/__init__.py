@@ -192,9 +192,10 @@ def generate_structure(game_map: GameMap, corner_x: int, corner_y: int, width: i
     """
     Generates structures of continuous walls
     """
-    structure = Structure(corner_x, corner_y, width, height)
+    structure = Structure(game_map, corner_x, corner_y, width, height)
     structure.make_binary_partition(0.8, 0.2, 4, 1)
     structure.generate_outside_connection()
     game_map.tiles[corner_x: corner_x + width, corner_y: corner_y + height] = structure.tiles[0: width, 0: height]
+    structure.generate_downstairs()
 
     return None
