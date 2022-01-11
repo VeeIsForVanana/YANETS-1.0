@@ -20,7 +20,8 @@ class Vision(BaseComponent):
         Returns a list of all visible entities from the gamemap
         :return: List of visible entities
         """
-        return [entity if self.vision_grid[entity.x, entity.y] else None for entity in self.gamemap.entities]
+        return [entity if self.vision_grid[entity.x, entity.y] and entity != self.parent else None for entity in
+                self.gamemap.entities]
 
     def update_fov(self):
         raise NotImplementedError("You are using the generic vision class")
@@ -33,6 +34,7 @@ class PlayerVision(Vision):
             radius = 9,
             algorithm=tcod.FOV_SYMMETRIC_SHADOWCAST
         )
+        return self.vision_grid
 
 
 class ShortVision(Vision):

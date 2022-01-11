@@ -38,13 +38,13 @@ class Engine:
                     pass # Ignore impossible action exceptions from AI.
 
     def update_fov(self) -> None:
-        """Recompute the visible area based on the player's point of view."""
-        self.game_map.visible[:] = compute_fov(
-            self.game_map.tiles["transparent"],
-            (self.player.x, self.player.y),
-            radius = 8,
-            algorithm=tcod.FOV_SYMMETRIC_SHADOWCAST
-        )
+        """Recompute the visible area based on the player's Vision component."""
+        self.game_map.visible[:] = self.player.vision.update_fov()
+        for i in self.game_map.actors:
+            if i.vision:
+                i.vision.update_fov()
+                if self.player in i.vision.visible_entities():
+                    print(f"{i.name} sees you!")
         # If a tile is visible, it should be added to "explored"
 
         self.game_map.explored |= self.game_map.visible

@@ -8,7 +8,7 @@ from components.fighter import Fighter
 from components.inventory import Inventory, PhysicalParts
 from components.level import Level
 from components.affiliation import Affiliations
-from components.vision import Vision
+from components.vision import Vision, ShortVision
 from entity import Entity
 from render_order import RenderOrder
 
@@ -22,7 +22,7 @@ class Actor(Entity):
             char: str = "?",
             color: Tuple[int, int, int] = (255, 255, 255),
             name: str = "<Unnamed>",
-            vision: Type[Vision] = None,
+            vision: Type[Vision] = ShortVision,
             affiliation: Affiliations = Affiliations.generic_hostile,
             physical_parts: PhysicalParts,
             ai_cls: Type[BaseAI],
