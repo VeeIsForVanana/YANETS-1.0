@@ -2,18 +2,14 @@ from __future__ import annotations
 
 import copy
 import math
-from typing import Optional, Tuple, TypeVar, TYPE_CHECKING, Union, Type, List
+from typing import Optional, Tuple, TypeVar, TYPE_CHECKING, Union
 
 from render_order import RenderOrder
 
 if TYPE_CHECKING:
-    from components.ai import BaseAI
     from components.consumable import Consumable
-    from components.equipment import Equipment
     from components.equippable import Equippable
-    from components.fighter import Fighter
     from components.inventory import Inventory
-    from components.level import Level
     from game_map import GameMap
 
 T = TypeVar("T", bound = "Entity")
@@ -88,53 +84,6 @@ class Entity:
         self.x += dx
         self.y += dy
 
-class Actor(Entity):
-    def __init__(
-            self,
-            *,
-            x: int = 0,
-            y: int = 0,
-            char: str = "?",
-            color: Tuple[int, int, int] = (255, 255, 255),
-            name: str = "<Unnamed>",
-            ai_cls: Type[BaseAI],
-            equipment: Equipment,
-            fighter: Fighter,
-            inventory: Inventory,
-            level: Level
-    ):
-        super().__init__(
-            x = x,
-            y = y,
-            char = char,
-            color = color,
-            name = name,
-            blocks_movement = True,
-            render_order = RenderOrder.ACTOR,
-        )
-
-        self.ai: Optional[BaseAI] = ai_cls(self)
-
-        self.equipment: Equipment = equipment
-        self.equipment.parent = self
-
-        self.fighter = fighter
-        self.fighter.parent = self
-
-        self.inventory = inventory
-        self.inventory.parent = self
-
-        self.level = level
-        self.level.parent = self
-
-    @property
-    def attributes(self) -> List:
-        return self.fighter.attributes
-
-    @property
-    def is_alive(self) -> bool:
-        """Returns True as long as this actor can perform actions."""
-        return bool(self.ai)
 
 class Item(Entity):
     def __init__(

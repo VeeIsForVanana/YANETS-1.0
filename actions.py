@@ -9,7 +9,8 @@ import tile_types
 if TYPE_CHECKING:
     from engine import Engine
     from entity import Entity
-    from entity import Actor, Entity, Item
+    from entity import Entity, Item
+    from actor import Actor
 
 
 class Action:

@@ -13,7 +13,7 @@ from message_log import MessageLog
 import render_functions
 
 if TYPE_CHECKING:
-    from entity import Actor
+    from actor import Actor
     from game_map import GameMap, GameWorld
 
 class Engine:

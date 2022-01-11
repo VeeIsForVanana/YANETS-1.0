@@ -14,7 +14,8 @@ from input_handlers import (
 )
 
 if TYPE_CHECKING:
-    from entity import Actor, Item
+    from entity import Item
+    from actor import Actor
 
 
 class Consumable(BaseComponent):

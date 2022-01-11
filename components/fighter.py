@@ -9,7 +9,8 @@ from components.attribute import Attribute, HealthAttribute, DefenseAttribute, P
 from render_order import RenderOrder
 
 if TYPE_CHECKING:
-    from entity import Actor
+    from actor import Actor
+
 
 class Fighter(BaseComponent):
     parent: Actor

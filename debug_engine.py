@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from engine import Engine
 from tcod import Console
-from entity import Actor, Entity
+from entity import Entity
+from actor import Actor
 import render_standards
 import render_functions
 

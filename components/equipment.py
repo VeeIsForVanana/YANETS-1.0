@@ -6,7 +6,8 @@ from components.base_component import BaseComponent
 from equipment_types import EquipmentType
 
 if TYPE_CHECKING:
-    from entity import Actor, Item
+    from entity import Item
+    from actor import Actor
 
 
 class Equipment(BaseComponent):

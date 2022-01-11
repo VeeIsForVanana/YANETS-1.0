@@ -6,7 +6,8 @@ import numpy as np  # type: ignore
 from tcod.console import Console
 
 import exceptions
-from entity import Actor, Item
+from entity import Item
+from actor import Actor
 import tile_types
 
 if TYPE_CHECKING:
