@@ -29,7 +29,10 @@ class Inventory(BaseComponent):
             self.engine.message_log.add_message(f"{'You' if self.parent.entity_id == 0 else self.parent.name}"
                                                 f" dropped {item.name}.")
         else:
-            dx, dy = random.randint(-1, 1), random.randint(-1, 1)
+            while True:
+                dx, dy = random.randint(-1, 1), random.randint(-1, 1)
+                if self.gamemap.tiles["walkable"][self.parent.x + dx, self.parent.y + dy]:
+                    break
             item.place(self.parent.x + dx, self.parent.y + dy, self.gamemap)
             self.engine.message_log.add_message(f"{'You' if self.parent.entity_id == 0 else self.parent.name}"
                                                 f" dropped {item.name}"
