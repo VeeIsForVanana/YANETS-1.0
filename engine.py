@@ -4,6 +4,7 @@ import lzma
 import pickle
 from typing import TYPE_CHECKING
 
+import tcod
 from tcod.console import Console
 from tcod.map import compute_fov
 
@@ -42,6 +43,7 @@ class Engine:
             self.game_map.tiles["transparent"],
             (self.player.x, self.player.y),
             radius = 8,
+            algorithm=tcod.FOV_SYMMETRIC_SHADOWCAST
         )
         # If a tile is visible, it should be added to "explored"
 
