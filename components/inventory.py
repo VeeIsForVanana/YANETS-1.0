@@ -34,3 +34,12 @@ class Inventory(BaseComponent):
             self.engine.message_log.add_message(f"{'You' if self.parent.entity_id == 0 else self.parent.name}"
                                                 f" dropped {item.name}"
                                                 f" randomly about as {'you' if self.parent.entity_id == 0 else 'they'} died.")
+
+class PhysicalParts(Inventory):
+    """
+    Unconsumable inventory objects representing actor body parts. init allows preloading with items
+    """
+
+    def __init__(self, capacity: int, parts: List[Item]):
+        super().__init__(capacity)
+        self.items = parts

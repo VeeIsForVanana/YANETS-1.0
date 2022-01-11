@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Dict, List, Tuple
 
 import entity_factories
+import item_factories
 from entity import Entity
 
 max_items_by_floor = [
@@ -15,10 +16,10 @@ max_monsters_by_floor = [
     (6, 5),
 ]
 item_chances: Dict[int, List[Tuple[Entity, int]]] = {
-    0: [(entity_factories.health_potion, 35)],
-    2: [(entity_factories.confusion_scroll, 10)],
-    4: [(entity_factories.lightning_scroll, 25), (entity_factories.sword, 5)],
-    6: [(entity_factories.fireball_scroll, 25), (entity_factories.chain_mail, 15)],
+    0: [(item_factories.health_potion, 35)],
+    2: [(item_factories.confusion_scroll, 10)],
+    4: [(item_factories.lightning_scroll, 25), (item_factories.sword, 5)],
+    6: [(item_factories.fireball_scroll, 25), (item_factories.chain_mail, 15)],
 }
 enemy_chances: Dict[int, List[Tuple[Entity, int]]] = {
     0: [(entity_factories.orc, 80)],

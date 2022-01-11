@@ -20,6 +20,7 @@ class Actor(Entity):
             char: str = "?",
             color: Tuple[int, int, int] = (255, 255, 255),
             name: str = "<Unnamed>",
+            physical_parts: PhysicalParts,
             ai_cls: Type[BaseAI],
             equipment: Equipment,
             fighter: Fighter,
@@ -46,6 +47,9 @@ class Actor(Entity):
 
         self.inventory = inventory
         self.inventory.parent = self
+
+        self.physical_parts = physical_parts
+        self.physical_parts.parent = self
 
         self.level = level
         self.level.parent = self

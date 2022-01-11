@@ -58,6 +58,9 @@ class Fighter(BaseComponent):
         if self.parent.inventory.items:
             for i in range(len(self.parent.inventory.items)):
                 self.parent.inventory.drop(self.parent.inventory.items[0])
+        if self.parent.physical_parts.items:
+            for i in range(len(self.parent.physical_parts.items)):
+                self.parent.physical_parts.drop(self.parent.physical_parts.items[0])
         self.parent.name = f"Remains of {self.parent.name}"
         self.parent.render_order = RenderOrder.CORPSE
         self.parent.gamemap.remove_entity_id(self.parent.entity_id)

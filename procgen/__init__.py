@@ -4,6 +4,7 @@ import random
 from typing import Dict, Tuple, List, TYPE_CHECKING
 
 import entity_factories
+import item_factories
 from game_map import GameMap, GameWorld
 import tile_types
 import render_standards as rs
@@ -124,8 +125,8 @@ def generate_dungeon(parent_world: GameWorld, max_rooms: int, room_min_size: int
             # The first room, where the player starts.
             player.place(new_room.center[0], new_room.center[1], dungeon)
             if parent_world.current_floor == 1:
-                entity_factories.dagger.spawn(dungeon, new_room.center[0] + 1, new_room.center[1])
-                entity_factories.leather_armor.spawn(dungeon, new_room.center[0] - 1, new_room.center[1])
+                item_factories.dagger.spawn(dungeon, new_room.center[0] + 1, new_room.center[1])
+                item_factories.leather_armor.spawn(dungeon, new_room.center[0] - 1, new_room.center[1])
         if len(rooms) >= 1: # All rooms after the first.
             # Dig out a tunnel between this room and the next one.
             for x, y in diagonal_between(rooms[-1].center, new_room.center):
