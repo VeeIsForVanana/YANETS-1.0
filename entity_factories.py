@@ -7,6 +7,7 @@ from components.fighter import Fighter
 from components.inventory import Inventory, PhysicalParts
 from components.level import Level
 from components.affiliation import Affiliations
+from components.vision import PlayerVision
 from item_factories import organic_matter
 from entity import Entity
 from actor import Actor
@@ -22,7 +23,8 @@ player = Actor(
     inventory=Inventory(capacity=26),
     physical_parts=PhysicalParts(2, [copy.deepcopy(organic_matter)]),
     level=Level(level_up_base=200),
-    affiliation=Affiliations.player
+    affiliation=Affiliations.player,
+    vision=PlayerVision
 )
 
 debug_player = Entity(

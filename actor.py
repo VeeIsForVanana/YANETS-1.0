@@ -8,6 +8,7 @@ from components.fighter import Fighter
 from components.inventory import Inventory, PhysicalParts
 from components.level import Level
 from components.affiliation import Affiliations
+from components.vision import Vision
 from entity import Entity
 from render_order import RenderOrder
 
@@ -21,13 +22,14 @@ class Actor(Entity):
             char: str = "?",
             color: Tuple[int, int, int] = (255, 255, 255),
             name: str = "<Unnamed>",
+            vision: Type[Vision] = None,
+            affiliation: Affiliations = Affiliations.generic_hostile,
             physical_parts: PhysicalParts,
             ai_cls: Type[BaseAI],
             equipment: Equipment,
             fighter: Fighter,
             inventory: Inventory,
             level: Level,
-            affiliation: Affiliations,
     ):
         super().__init__(
             x = x,
@@ -40,6 +42,10 @@ class Actor(Entity):
         )
 
         self.ai: Optional[BaseAI] = ai_cls(self)
+
+        if vision:
+            self.vision = vision(self)
+            self.vision.parent = self
 
         self.equipment: Equipment = equipment
         self.equipment.parent = self
