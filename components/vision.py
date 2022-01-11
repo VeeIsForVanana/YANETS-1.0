@@ -20,8 +20,16 @@ class Vision(BaseComponent):
         Returns a list of all visible entities from the gamemap
         :return: List of visible entities
         """
-        return [entity if self.vision_grid[entity.x, entity.y] and entity != self.parent else None for entity in
+        return [entity if self.vision_grid[entity.x][entity.y] and entity != self.parent else None for entity in
                 self.gamemap.entities]
+
+    def visible_actors(self) -> List[Entity]:
+        """
+        Returns a list of all visible actors from the gamemap
+        :return:
+        """
+        return [entity if self.vision_grid[entity.x][entity.y] and entity != self.parent else None for entity in
+                self.gamemap.actors]
 
     def update_fov(self):
         raise NotImplementedError("You are using the generic vision class")

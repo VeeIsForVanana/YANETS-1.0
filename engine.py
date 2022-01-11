@@ -43,7 +43,7 @@ class Engine:
         for i in self.game_map.actors:
             if i.vision:
                 i.vision.update_fov()
-                if self.player in i.vision.visible_entities():
+                if self.player in i.vision.visible_actors():
                     print(f"{i.name} sees you!")
         # If a tile is visible, it should be added to "explored"
 
