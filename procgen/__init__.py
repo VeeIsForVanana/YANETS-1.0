@@ -80,7 +80,9 @@ def place_entities(
         x = random.randint(room.x1 + 1, room.x2 - 1)
         y = random.randint(room.y1 + 1, room.y2 - 1)
 
-        if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
+        if not any(entity.x == x and entity.y == y for entity in dungeon.entities) and \
+                (dungeon.tiles["walkable"][x, y]):
+            print(f"{entity.name} spawned at {x}, {y}. Walkable? {dungeon.tiles['walkable'][x, y]}")
             entity.spawn(dungeon, x, y)
 
 def generate_dungeon(parent_world: GameWorld, max_rooms: int, room_min_size: int, room_max_size: int, map_width: int,

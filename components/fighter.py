@@ -67,8 +67,8 @@ class Fighter(BaseComponent):
         self.parent.gamemap.new_entity_id(self.parent)
 
         self.engine.message_log.add_message(death_message, death_message_color)
-
-        self.engine.player.level.add_xp(self.parent.level.xp_given)
+        if self.engine.player.level is not None:
+            self.engine.player.level.add_xp(self.parent.level.xp_given)
 
     def heal(self, amount: int) -> int:
         if self.hp_attr.value == self.hp_attr.max:

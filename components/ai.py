@@ -90,7 +90,7 @@ class ConfusedEnemy(BaseAI):
             return BumpAction(self.entity, direction_x, direction_y,).perform()
 
 
-class HostileEnemy(BaseAI):
+class PursuitAI(BaseAI):
     def __init__(self, entity: Actor):
         super().__init__(entity)
         self.path: List[Tuple[int, int]] = []
@@ -114,3 +114,39 @@ class HostileEnemy(BaseAI):
             ).perform()
 
         return WaitAction(self.entity).perform()
+
+class WanderAI(BaseAI):
+    def __init__(self, entity: Actor):
+        super().__init__(entity)
+
+    def perform(self):
+        movement_chance = random.random()
+        if movement_chance > 0.5:
+            return WaitAction(self.entity)
+        else:
+            direction_x, direction_y = random.choice(
+                [
+                    (-1, -1),
+                    (0, -1),
+                    (1, -1),
+                    (-1, 0),
+                    (1, 0),
+                    (-1, 1),
+                    (0, 1),
+                    (1, 1)
+                ]
+            )
+        return MovementAction(self.entity, direction_x, direction_y).perform()
+
+class TargetableAI(BaseAI):
+    def __init__(self, entity: Actor):
+        super().__init__(entity)
+        self.PursuitMode = PursuitAI(entity)
+        self.WanderMode = WanderAI(entity)
+        self.targets: List[Actor] = []
+
+    def perform(self) -> None:
+        if self.PursuitMode.path or self.engine.game_map.visible[self.entity.x, self.entity.y]:
+            return self.PursuitMode.perform()
+        else:
+            self.WanderMode.perform()

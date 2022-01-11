@@ -5,7 +5,7 @@ from typing import Tuple, Type, Optional, List
 from components.ai import BaseAI
 from components.equipment import Equipment
 from components.fighter import Fighter
-from components.inventory import Inventory
+from components.inventory import Inventory, PhysicalParts
 from components.level import Level
 from entity import Entity
 from render_order import RenderOrder
