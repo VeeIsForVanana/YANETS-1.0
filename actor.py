@@ -7,6 +7,7 @@ from components.equipment import Equipment
 from components.fighter import Fighter
 from components.inventory import Inventory, PhysicalParts
 from components.level import Level
+from components.affiliation import Affiliations
 from entity import Entity
 from render_order import RenderOrder
 
@@ -25,7 +26,8 @@ class Actor(Entity):
             equipment: Equipment,
             fighter: Fighter,
             inventory: Inventory,
-            level: Level
+            level: Level,
+            affiliation: Affiliations,
     ):
         super().__init__(
             x = x,
@@ -53,6 +55,8 @@ class Actor(Entity):
 
         self.level = level
         self.level.parent = self
+
+        self.affiliation = affiliation
 
     @property
     def attributes(self) -> List:

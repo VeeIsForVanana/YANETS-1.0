@@ -6,6 +6,7 @@ from components.equipment import Equipment
 from components.fighter import Fighter
 from components.inventory import Inventory, PhysicalParts
 from components.level import Level
+from components.affiliation import Affiliations
 from item_factories import organic_matter
 from entity import Entity
 from actor import Actor
@@ -20,7 +21,8 @@ player = Actor(
     fighter=Fighter(hp=30, base_defense=1, base_power=2),
     inventory=Inventory(capacity=26),
     physical_parts=PhysicalParts(2, [copy.deepcopy(organic_matter)]),
-    level=Level(level_up_base=200)
+    level=Level(level_up_base=200),
+    affiliation=Affiliations.player
 )
 
 debug_player = Entity(

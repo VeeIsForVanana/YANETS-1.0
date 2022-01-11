@@ -143,7 +143,6 @@ class TargetableAI(BaseAI):
         super().__init__(entity)
         self.PursuitMode = PursuitAI(entity)
         self.WanderMode = WanderAI(entity)
-        self.targets: List[Actor] = []
 
     def perform(self) -> None:
         if self.PursuitMode.path or self.engine.game_map.visible[self.entity.x, self.entity.y]:
