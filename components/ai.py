@@ -140,6 +140,10 @@ class WanderAI(BaseAI):
             )
         return MovementAction(self.entity, direction_x, direction_y).perform()
 
+class RetreatAI(BaseAI):
+    def __init__(self, entity: Actor):
+        super().__init__(entity)
+
 class TargetableAI(BaseAI):
     def __init__(self, entity: Actor):
         super().__init__(entity)
@@ -160,3 +164,6 @@ class TargetableAI(BaseAI):
             return self.PursuitMode.perform()
         else:
             self.WanderMode.perform()
+
+class RetreatableAI(TargetableAI):
+    def perform(self) -> None:

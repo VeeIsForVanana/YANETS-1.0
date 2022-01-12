@@ -20,6 +20,7 @@ class Entity:
     """
 
     parent: Union[GameMap, Inventory]
+    last_attacker = None
 
     def __init__(
             self,

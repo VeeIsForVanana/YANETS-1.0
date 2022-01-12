@@ -173,6 +173,7 @@ class ActionWithDirection(Action):
 class MeleeAction(ActionWithDirection):
     def perform(self) -> None:
         target = self.target_actor
+        target.last_attacker = self.entity
         if not target:
             raise exceptions.Impossible("Nothing to attack.")
 
