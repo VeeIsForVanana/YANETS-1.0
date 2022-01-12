@@ -22,11 +22,12 @@ class Vision(BaseComponent):
         """
         visible_entities: List[Entity] = []
         for i in self.gamemap.entities:
-            try:
-                if self.vision_grid[i.x][i.y] and i is not self.parent:
-                    visible_entities.append(i)
-            except IndexError:
-                print(f"Index Error for {i}, at {i.x}, {i.y}")
+            if len(self.vision_grid) != 0:
+                try:
+                    if self.vision_grid[i.x][i.y] and i is not self.parent:
+                        visible_entities.append(i)
+                except IndexError:
+                    print(f"Vision Index Error raised by {self.parent.name} for {i.name}, at {i.x}, {i.y}")
         return visible_entities
 
     def visible_actors(self) -> List[Entity]:
@@ -37,11 +38,12 @@ class Vision(BaseComponent):
         """
         visible_actors: List[Actor] = []
         for i in self.gamemap.actors:
-            try:
-                if self.vision_grid[i.x][i.y] and i is not self.parent:
-                    visible_actors.append(i)
-            except IndexError:
-                print(f"Index Error for {i}, at {i.x}, {i.y}")
+            if len(self.vision_grid) != 0:
+                try:
+                    if self.vision_grid[i.x][i.y] and i is not self.parent:
+                        visible_actors.append(i)
+                except IndexError:
+                    print(f"Vision Index Error raised by {self.parent.name} for {i.name}, at {i.x}, {i.y}")
         return visible_actors
 
     def update_fov(self):

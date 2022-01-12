@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 class BaseAI(Action):
     entity: Actor
+    target: Optional[Actor] = None
 
     def perform(self) -> None:
         raise NotImplementedError()
@@ -153,7 +154,8 @@ class TargetableAI(BaseAI):
         return self.potential_targets()[0] if len(self.potential_targets()) != 0 else None
 
     def perform(self) -> None:
-        self.PursuitMode.target = self.set_target()
+        self.target = self.set_target()
+        self.PursuitMode.target = self.target
         if self.PursuitMode.target:
             return self.PursuitMode.perform()
         else:

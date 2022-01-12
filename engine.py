@@ -40,11 +40,12 @@ class Engine:
     def update_fov(self) -> None:
         """Recompute the visible area based on the player's Vision component."""
         self.game_map.visible[:] = self.player.vision.update_fov()
+        # Update visibility for all other entities
         for i in self.game_map.actors:
             if i.vision:
                 i.vision.update_fov()
-                if self.player in i.vision.visible_actors():
-                    print(f"{i.name} sees you!")
+                if self.player is i.ai.target:
+                    self.message_log.add_message(f"You are being targeted by {i.name}")
         # If a tile is visible, it should be added to "explored"
 
         self.game_map.explored |= self.game_map.visible
