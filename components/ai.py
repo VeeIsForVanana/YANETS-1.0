@@ -7,7 +7,7 @@ import numpy as np  # type: ignore
 import tcod
 
 from actions import Action, BumpAction, MeleeAction, MovementAction, WaitAction
-
+from components.attribute import Attribute
 
 if TYPE_CHECKING:
     from actor import Actor
@@ -90,7 +90,6 @@ class ConfusedEnemy(BaseAI):
             # It's possible the actor will just bump into the wall, wasting a turn.
             return BumpAction(self.entity, direction_x, direction_y,).perform()
 
-
 class PursuitAI(BaseAI):
     def __init__(self, entity: Actor):
         super().__init__(entity)
@@ -140,15 +139,41 @@ class WanderAI(BaseAI):
             )
         return MovementAction(self.entity, direction_x, direction_y).perform()
 
-class RetreatAI(BaseAI):
+class PathableAI(BaseAI):
+    """
+    An AI with a target designated by its self.target point that paths to said target without attacking.
+    """
     def __init__(self, entity: Actor):
         super().__init__(entity)
+        self.target = None
+        self.path = None
+
+    def perform(self) -> None:
+        if self.target is not None:
+            target = self.target
+            dx = target[0] - self.entity.x
+            dy = target[1] - self.entity.y
+            distance = min(abs(dx), abs(dy))
+
+            self.path = self.get_path_to(target[0], target[1])
+
+            if self.path:
+                if distance == 0:
+                    self.path = None    # Deletes the path when at destination
+                else:
+                    dest_x, dest_y = self.path.pop(0)
+                    return MovementAction(
+                        self.entity, dest_x - self.entity.x, dest_y - self.entity.y
+                    ).perform()
+
+        return WaitAction(self.entity).perform()
+
 
 class TargetableAI(BaseAI):
     def __init__(self, entity: Actor):
         super().__init__(entity)
-        self.PursuitMode = PursuitAI(entity)
-        self.WanderMode = WanderAI(entity)
+        self.pursuit_mode = PursuitAI(entity)
+        self.wander_mode = WanderAI(entity)
 
     def potential_targets(self) -> List[Actor]:
         return [actor if actor.affiliation != self.entity.affiliation else None for actor in
@@ -159,11 +184,51 @@ class TargetableAI(BaseAI):
 
     def perform(self) -> None:
         self.target = self.set_target()
-        self.PursuitMode.target = self.target
-        if self.PursuitMode.target:
-            return self.PursuitMode.perform()
+        self.pursuit_mode.target = self.target
+        if self.pursuit_mode.target:
+            return self.pursuit_mode.perform()
         else:
-            self.WanderMode.perform()
+            return self.wander_mode.perform()
 
 class RetreatableAI(TargetableAI):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.retreat_mode = PathableAI(entity)
+        self.retreat_cooldown: int = 0
+
+    def find_retreat_point(self, retreat_from):
+        retreatable = False
+        dx = self.entity.x - retreat_from[0]
+        dy = self.entity.y - retreat_from[1]
+        own_x = self.entity.x
+        own_y = self.entity.y
+        max_x = self.entity.gamemap.width - 1
+        max_y = self.entity.gamemap.height - 1
+        while not retreatable:
+            random_x = (random.randint(own_x, max_x) if dx < 0 else
+                        random.randint(0, max_x) if dx == 0 else
+                        random.randint(0, own_x))
+            random_y = (random.randint(own_y, max_y) if dy < 0 else
+                        random.randint(0, max_y) if dy == 0 else
+                        random.randint(0, own_y))
+            retreatable = self.entity.gamemap.tiles["walkable"][random_x, random_y]
+        print(f"{self.entity.name} is retreating from {retreat_from} to {(random_x, random_y)}")
+        return random_x, random_y
+
     def perform(self) -> None:
+        entity_health_attribute: Attribute = self.entity.fighter.hp_attr
+        self.target = self.set_target()
+        self.pursuit_mode.target = self.target
+        if entity_health_attribute.value <= entity_health_attribute.max // 2:
+            # When the entity is at a fourth of its health or less, enter retreat mode
+            if (not self.retreat_mode.path or self.entity.last_attacker in self.entity.vision.visible_actors()) and \
+                self.retreat_cooldown == 0:
+                self.retreat_mode.target = self.find_retreat_point((self.entity.last_attacker.x,
+                                                                    self.entity.last_attacker.y))
+                self.retreat_cooldown = 10
+            self.retreat_cooldown -= 1
+            return self.retreat_mode.perform()
+        elif self.pursuit_mode.target:
+            return self.pursuit_mode.perform()
+        else:
+            return self.wander_mode.perform()

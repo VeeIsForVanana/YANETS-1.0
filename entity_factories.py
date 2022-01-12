@@ -1,7 +1,7 @@
 import copy
 
 import render_order
-from components.ai import PursuitAI, BaseAI, TargetableAI
+from components.ai import RetreatableAI, BaseAI, TargetableAI
 from components.equipment import Equipment
 from components.fighter import Fighter
 from components.inventory import Inventory, PhysicalParts
@@ -38,7 +38,7 @@ orc = Actor(
     char="o",
     color=(63, 127, 63),
     name="Orc",
-    ai_cls=TargetableAI,
+    ai_cls=RetreatableAI,
     equipment=Equipment(),
     fighter=Fighter(hp=10, base_defense=0, base_power=3),
     inventory=Inventory(capacity=0),
