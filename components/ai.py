@@ -94,24 +94,25 @@ class PursuitAI(BaseAI):
     def __init__(self, entity: Actor):
         super().__init__(entity)
         self.path: List[Tuple[int, int]] = []
+        self.target = None
 
     def perform(self) -> None:
-        target = self.engine.player
-        dx = target.x - self.entity.x
-        dy = target.y - self.entity.y
-        distance = max(abs(dx), abs(dy)) # Chebyshev distance.
+        if self.target is not None:
+            target = self.target
+            dx = target.x - self.entity.x
+            dy = target.y - self.entity.y
+            distance = max(abs(dx), abs(dy)) # Chebyshev distance.
 
-        if self.engine.game_map.visible[self.entity.x, self.entity.y]:
             if distance <= 1:
                 return MeleeAction(self.entity, dx, dy).perform()
 
             self.path = self.get_path_to(target.x, target.y)
 
-        if self.path:
-            dest_x, dest_y = self.path.pop(0)
-            return MovementAction(
-                self.entity, dest_x - self.entity.x, dest_y - self.entity.y
-            ).perform()
+            if self.path:
+                dest_x, dest_y = self.path.pop(0)
+                return MovementAction(
+                    self.entity, dest_x - self.entity.x, dest_y - self.entity.y
+                ).perform()
 
         return WaitAction(self.entity).perform()
 
@@ -144,8 +145,16 @@ class TargetableAI(BaseAI):
         self.PursuitMode = PursuitAI(entity)
         self.WanderMode = WanderAI(entity)
 
+    def potential_targets(self) -> List[Actor]:
+        return [actor if actor.affiliation != self.entity.affiliation else None for actor in
+                self.entity.vision.visible_actors()]
+
+    def set_target(self) -> Actor:
+        return self.potential_targets()[0] if len(self.potential_targets()) != 0 else None
+
     def perform(self) -> None:
-        if self.PursuitMode.path or self.engine.game_map.visible[self.entity.x, self.entity.y]:
+        self.PursuitMode.target = self.set_target()
+        if self.PursuitMode.target:
             return self.PursuitMode.perform()
         else:
             self.WanderMode.perform()
