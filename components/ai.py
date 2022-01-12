@@ -191,10 +191,16 @@ class TargetableAI(BaseAI):
             return self.wander_mode.perform()
 
 class RetreatableAI(TargetableAI):
-    def __init__(self, entity):
+    def __init__(self, entity, retreat_threshold: float = 0.5):
+        """
+        Creates an AI capable of attacking and retreating when their health reaches the retreat_threshold
+        :param entity: Parent entity
+        :param retreat_threshold: Float representing the fraction of health required before retreat mode kicks in
+        """
         super().__init__(entity)
         self.retreat_mode = PathableAI(entity)
         self.retreat_cooldown: int = 0
+        self.retreat_threshold = retreat_threshold
 
     def find_retreat_point(self, retreat_from):
         retreatable = False
@@ -219,10 +225,9 @@ class RetreatableAI(TargetableAI):
         entity_health_attribute: Attribute = self.entity.fighter.hp_attr
         self.target = self.set_target()
         self.pursuit_mode.target = self.target
-        if entity_health_attribute.value <= entity_health_attribute.max // 2:
+        if entity_health_attribute.value <= entity_health_attribute.max * self.retreat_threshold:
             # When the entity is at a fourth of its health or less, enter retreat mode
-            if (not self.retreat_mode.path or self.entity.last_attacker in self.entity.vision.visible_actors()) and \
-                self.retreat_cooldown == 0:
+            if (not self.retreat_mode.path or self.entity.last_attacker in self.entity.vision.visible_actors()) and self.retreat_cooldown == 0:
                 self.retreat_mode.target = self.find_retreat_point((self.entity.last_attacker.x,
                                                                     self.entity.last_attacker.y))
                 self.retreat_cooldown = 10
