@@ -7,7 +7,7 @@ from components.equipment import Equipment
 from components.fighter import Fighter
 from components.inventory import Inventory, PhysicalParts
 from components.level import Level
-from components.affiliation import Affiliations
+from components.affiliation import Affiliations, default_hostilities
 from components.vision import Vision, ShortVision
 from entity import Entity
 from render_order import RenderOrder
@@ -63,6 +63,7 @@ class Actor(Entity):
         self.level.parent = self
 
         self.affiliation = affiliation
+        self.hostility_set = default_hostilities.get(self.affiliation, None)
 
     @property
     def attributes(self) -> List:

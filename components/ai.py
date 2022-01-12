@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import random
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING, Set
 
 import numpy as np  # type: ignore
 import tcod
@@ -175,12 +175,27 @@ class TargetableAI(BaseAI):
         self.pursuit_mode = PursuitAI(entity)
         self.wander_mode = WanderAI(entity)
 
-    def potential_targets(self) -> List[Actor]:
-        return [actor if actor.affiliation != self.entity.affiliation else None for actor in
-                self.entity.vision.visible_actors()]
+    def potential_targets(self) -> Optional[Set[Actor]]:
+        from actor import Actor
+        from components.affiliation import Affiliations
+        potential_targets: set = set()
+        if not self.entity.hostility_set is None:
+            hostiles = self.entity.hostility_set
+            hostile_affiliations: set = set()
+            hostile_entities: set = set()
+
+            for i in hostiles:
+                if isinstance(i, Actor):
+                    hostile_entities.add(i)
+                elif isinstance(i, Affiliations):
+                    hostile_affiliations.add(i)
+            for i in self.entity.vision.visible_actors():
+                if i.affiliation in hostile_affiliations or i in hostile_entities:
+                    potential_targets.add(i)
+        return potential_targets
 
     def set_target(self) -> Actor:
-        return self.potential_targets()[0] if len(self.potential_targets()) != 0 else None
+        return list(self.potential_targets())[0] if len(self.potential_targets()) != 0 else None
 
     def perform(self) -> None:
         self.target = self.set_target()

@@ -173,10 +173,11 @@ class ActionWithDirection(Action):
 class MeleeAction(ActionWithDirection):
     def perform(self) -> None:
         target = self.target_actor
-        target.last_attacker = self.entity
         if not target:
             raise exceptions.Impossible("Nothing to attack.")
-
+        target.last_attacker = self.entity
+        if self.entity.hostility_set:
+            self.entity.hostility_set.add(target.last_attacker)
         if target.fighter.defense:
             damage = int(min(1.0, self.entity.fighter.power / target.fighter.defense) * self.entity.fighter.power)
 
